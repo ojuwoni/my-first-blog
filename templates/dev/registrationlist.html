@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Liste des enregistrement</h1>
+  {% if registration_list %}
+  <ul>
+    {% for registration in registration_list %}
+      <li>
+        <a href="{{ registration.get_absolute_url }}">{{ registration.lastname }}</a> ({{registration.firstname}})
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>Il n'y a pas de naissance.</p>
+  {% endif %}       
+{% endblock %}

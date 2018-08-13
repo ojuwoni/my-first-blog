@@ -1,0 +1,322 @@
+from django import forms
+from .models import Person, Identity, Supervisor, BirthCertificate, Bulletin, Registration
+from django_countries.widgets import CountrySelectWidget
+from django.utils.translation import ugettext_lazy as _, ugettext
+from crispy_forms.helper import FormHelper
+from crispy_forms import layout, bootstrap
+
+from crispy_forms.bootstrap import StrictButton
+from bootstrap3_datetime.widgets import DateTimePicker
+from crispy_forms.layout import Layout
+from crispy_forms.bootstrap import TabHolder, Tab
+#from captcha.fields import CaptchaField
+
+
+
+class CustomLabelModelChoiceField(forms.ModelChoiceField):
+ 
+	def __init__(self, *args, **kwargs):
+		self._label_from_instance = kwargs.pop('label_func')
+		super(CustomLabelModelChoiceField, self).__init__(*args, **kwargs)
+ 
+	def label_from_instance(self, obj):
+		return self._label_from_instance(obj)
+
+
+class BirthCertificateForm2(forms.ModelForm):
+	#################################################################################
+        # Declaration des champs à afficher, il n'est pas nécessaire ici de rajouter    #
+        # birthcountry, puisque nous n'enregistrons que les naissances du pays en cours # 
+        #################################################################################
+
+	def __init__(self, *args, **kwargs):
+		"""
+		Surcharge de l'initialisation du formulaire
+		"""
+		super().__init__(*args, **kwargs)
+		# Tu modifies le label de la date de naissance pour rajouter le format
+		self.fields['birthday'].label = "%s (JJ/MM/AAAA)" % "Date de naissance"
+		# Tu utilises FormHelper pour customiser ton formulaire
+		self.helper = FormHelper()
+		# Tu définis l'id et la classe bootstrap de ton formulaire
+		self.helper.form_class = 'form-horizontal'
+		self.helper.form_id = 'BirthCertificateForm-form'
+		# Tu définis la taille des labels et des champs sur la grille
+		self.helper.label_class = 'col-md-2'
+		self.helper.field_class = 'col-md-8'
+		# Tu crées l'affichage de ton formulaire
+		self.helper.layout = Layout(
+		# Le formulaire va contenir 3 onglets
+		TabHolder(
+			# Premier onglet
+			Tab(
+				# Label de l'onglet
+				'Étape 1 - Identité du nouveau né',
+				# Liste des champs du modèle à afficher dans l'onglet
+				'lastname',
+				'firstname',
+				'sex',
+				# Tu rajoutes un bouton "Suivant"
+				StrictButton(
+					'<span class="glyphicon glyphicon-arrow-right" \
+					aria-hidden="true"></span> %s' % "Suivant",
+					type='button',
+					css_class='btn-default col-md-offset-9 btnNext',
+					)
+
+			),
+			# Deuxième onglet
+			Tab(
+				# Label de l'onglet
+				'Étape 2 - Les données de naissance',
+				# Liste des champs à afficher
+				'num_cert',
+				'poids',
+				'birthday',
+				'birthour',
+				'birthcity',
+				'fk_parent1',
+				'fk_parent2',
+				'mairie',
+				# Tu rajoutes des boutons "Précédent" et "Suivant"
+				StrictButton(
+					'<span class="glyphicon glyphicon-arrow-left" \
+					aria-hidden="true"></span> %s' % 'Précédent',
+					type='button',
+					css_class='btn-default btnPrevious',
+					),
+				StrictButton(
+					'<span class="glyphicon glyphicon-ok" \
+					aria-hidden="true"></span> %s' % "Valider",
+					type='submit',
+					css_class='btn-default col-md-offset-8'
+				)
+			),
+		),
+	)
+
+	class Meta :
+		model = BirthCertificate
+		fields = ['lastname', 'firstname', 'poids', 'sex', 'birthday', 'birthour','birthcity', 
+			'fk_parent1', 'fk_parent2', 'mairie', 'num_cert']
+		widgets = {'birthday': DateTimePicker(
+				options={"format": "DD/MM/YYYY", "pickTime": False,
+					"useStrict": True, "viewMode": "years",
+					"startDate": "01/01/1900"},
+					attrs={'placeholder': 'ex: 05/11/1975'}
+				),
+			'birthour': DateTimePicker(
+				options={"format": "H:i:s", "pickTime": False,
+					"useStrict": True, "viewMode": "hours",
+					"startDate": "00:00:00"},
+					attrs={'placeholder': 'ex: 09:20:34'}
+				)
+			}
+
+
+
+
+class IdentityForm(forms.ModelForm) :
+ 
+    class Meta :
+        model = Identity
+        fields = '__all__'
+
+
+
+
+#class PersonForm(forms.ModelForm):
+
+
+
+
+
+
+class FormInscription(forms.Form):
+	# This line creates the form with four fields. It is an object that
+	#inherits from forms.Form. It contains attributes that define the form fields.
+	name = forms.CharField(label="Name", max_length=30)
+	login = forms.CharField(label="Login", max_length=30)
+	password = forms.CharField(label="Password", widget=forms.PasswordInput)
+	supervisor = forms.ModelChoiceField(label="Supervisor", queryset=Supervisor.objects.all())
+# View for create_developer
+
+
+
+class BulletinForm(forms.ModelForm):
+	class Meta:
+		model = Bulletin
+		fields = ['bulletin_type', 'title', 'description',
+		    'contact_person', 'phone', 'email', 'image']
+
+	def __init__(self, *args, **kwargs):
+		super(BulletinForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper()
+		self.helper.form_action = ""
+		self.helper.form_method = "POST"
+		self.fields['bulletin_type'].widget = forms.RadioSelect()
+	# delete empty choice for the type
+
+		del self.fields['bulletin_type'].choices[0]
+		self.helper.layout = layout.Layout(
+			layout.Fieldset(
+					_("Main data"),
+			layout.Field("bulletin_type"),
+			layout.Field("title", css_class="input-block-level"),
+			layout.Field("description", 
+			    css_class="input-blocklevel", rows="3"),
+		    ),
+			layout.Fieldset(
+				_("Image"),
+			layout.Field("image", css_class="input-block-level"),
+				layout.HTML(u"""{% load i18n %
+					    <p class="help-block">{% trans "Available formats 
+						are JPG, GIF, and PNG. Minimal size is 800 × 800 px." %}</p>
+						"""),
+					title=_("Image upload"),
+					css_id="image_fieldset",
+					),
+			layout.Fieldset(
+				_("Contact"),
+			layout.Field("contact_person",
+				css_class="input-blocklevel"),
+				layout.Div(
+					bootstrap.PrependedText("phone", """<span
+								class="glyphicon glyphicon-earphone"></span>""", 
+								css_class="inputblock-level"),
+				bootstrap.PrependedText("email", "@",
+							css_class="input-block-level",
+							placeholder="contact@example.com"),
+							css_id="contact_info",
+							),
+						),
+				bootstrap.FormActions(
+						layout.Submit('submit', _('Save')),
+					)
+				)
+
+
+
+
+
+
+
+class RegistrationForm(forms.ModelForm):
+	"""
+	Formulaire d'inscription
+	"""
+
+	# Ici, tu vas rajouter les champs supplémentaires au modèle
+	# Tu définis le captcha
+	#captcha = CaptchaField()
+	# Tu ajoutes un mail de confirmation
+	confirmation_mail = forms.EmailField(label="Mail de confirmation")
+
+	def __init__(self, *args, **kwargs):
+		"""
+		Surcharge de l'initialisation du formulaire
+		"""
+		super().__init__(*args, **kwargs)
+		# Tu modifies le label de la date de naissance pour rajouter le format
+		self.fields['birthday'].label = "%s (JJ/MM/AAAA)" % "Date de naissance"
+		# Tu utilises FormHelper pour customiser ton formulaire
+		self.helper = FormHelper()
+		# Tu définis l'id et la classe bootstrap de ton formulaire
+		self.helper.form_class = 'form-horizontal'
+		self.helper.form_id = 'registration-form'
+		# Tu définis la taille des labels et des champs sur la grille
+		self.helper.label_class = 'col-md-2'
+		self.helper.field_class = 'col-md-8'
+		# Tu crées l'affichage de ton formulaire
+		self.helper.layout = Layout(
+		# Le formulaire va contenir 3 onglets
+		TabHolder(
+			# Premier onglet
+			Tab(
+			# Label de l'onglet
+			'Étape 1 - Identité',
+			# Liste des champs du modèle à afficher dans l'onglet
+			'title',
+			'lastname',
+			'firstname',
+			'young_girl_lastname',
+			'birthday',
+			'birthcity',
+			'nationality',
+			# Tu rajoutes un bouton "Suivant"
+			StrictButton(
+				'<span class="glyphicon glyphicon-arrow-right" \
+				aria-hidden="true"></span> %s' % "Suivant",
+				type='button',
+				css_class='btn-default col-md-offset-9 btnNext',
+				)
+
+			),
+			# Deuxième onglet
+			Tab(
+				# Label de l'onglet
+				'Étape 2 - Adresse',
+				# Liste des champs à afficher
+				'address',
+				'city',
+				'borough',
+				'district',
+				'islet',
+				'plot',
+				'phone',
+			# Tu rajoutes des boutons "Précédent" et "Suivant"
+			StrictButton(
+				'<span class="glyphicon glyphicon-arrow-left" \
+				aria-hidden="true"></span> %s' % 'Précédent',
+				type='button',
+				css_class='btn-default btnPrevious',
+				),
+			StrictButton(
+				'<span class="glyphicon glyphicon-arrow-right" \
+				aria-hidden="true"></span> %s' % 'Suivant',
+				type='button',
+				css_class='btn-default col-md-offset-8 btnNext',
+				)
+			),
+			# Troisième onglet
+			Tab(
+				# Label de l'onglet
+				'Étape 3 - Validation',
+				# Liste des champs à afficher dont les champs supplémentaires
+				'mail',
+				'confirmation_mail',
+				'comments',
+				# 'captcha',
+				# Tu rajoutes des boutons "Précédent" et "Valider"
+			StrictButton(
+				'<span class="glyphicon glyphicon-arrow-left" \
+				aria-hidden="true"></span> %s' % "Précédent",
+				type='button',
+				css_class='btn-default btnPrevious',
+				),
+			StrictButton(
+				'<span class="glyphicon glyphicon-ok" \
+				aria-hidden="true"></span> %s' % "Valider",
+				type='submit',
+				css_class='btn-default col-md-offset-8'
+				)
+				),
+			),
+		)
+
+
+	class Meta:
+		# Tu définis le modèle utilisé
+		model = Registration
+		fields = ['lastname', 'firstname', 'sex', 'birthday', 'birthcity']
+
+		# Tu customises le champ date de naissance pour ajouter le date picker
+		widgets = {
+		'birthday': DateTimePicker(
+		options={"format": "DD/MM/YYYY", "pickTime": False,
+			 "useStrict": True, "viewMode": "years",
+			 "startDate": "01/01/1900"},
+		attrs={'placeholder': 'ex: 05/11/1975'}
+		)
+		}
+

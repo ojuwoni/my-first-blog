@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestion des fiches individuelles 
+{% endblock title %}
+{% block nav-style %}mkt-nav{% endblock nav-style %}
+{% block content %}
+<p> </p>
+<p>*    <a href="{% url 'eregister:CreatePlug' %}">Créer une nouvelle fiche individuelle</a></p>
+<p> *   <a href="{% url 'eregister:ViewPlug' %}">Consulter/Editer une fiche individuelle</a></p>
+<p> *   Supprimer une fiche individuelle </p>
+{% endblock content %}
+~

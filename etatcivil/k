@@ -1,0 +1,31 @@
+                  List of relations
+ Schema |            Name            | Type  | Owner  
+--------+----------------------------+-------+--------
+ public | auth_group                 | table | system
+ public | auth_group_permissions     | table | system
+ public | auth_permission            | table | system
+ public | auth_user                  | table | system
+ public | auth_user_groups           | table | system
+ public | auth_user_user_permissions | table | system
+ public | captcha_captchastore       | table | system
+ public | django_admin_log           | table | system
+ public | django_content_type        | table | system
+ public | django_migrations          | table | system
+ public | django_session             | table | system
+ public | etatcivil_birthcertificate | table | system
+ public | etatcivil_bulletin         | table | system
+ public | etatcivil_country          | table | system
+ public | etatcivil_deces            | table | system
+ public | etatcivil_developer        | table | system
+ public | etatcivil_femmes           | table | system
+ public | etatcivil_hommes           | table | system
+ public | etatcivil_identity         | table | system
+ public | etatcivil_mortsfoetales    | table | system
+ public | etatcivil_naissances       | table | system
+ public | etatcivil_person           | table | system
+ public | etatcivil_project          | table | system
+ public | etatcivil_registration     | table | system
+ public | etatcivil_supervisor       | table | system
+ public | etatcivil_task             | table | system
+(26 rows)
+

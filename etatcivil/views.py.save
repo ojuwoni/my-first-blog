@@ -1,0 +1,131 @@
+from django import forms
+from django.utils.translation import ugettext_lazy as _, ugettext
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Div, Submit, HTML, Button, Row, Field
+from crispy_forms import layout, bootstrap
+from .models import Bulletin, BirthCertificate, Registration, Person
+from .forms import BulletinForm, RegistrationForm, BirthCertificateForm2
+
+from django.views.generic.edit import CreateView
+from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import render
+
+
+#################################################
+# Premièe page de l'application de l'etat civil #
+# vue de connection de tout le projet           #
+#################################################
+
+from django.shortcuts import render
+
+
+class DeclarationBirth(CreateView):
+
+	"""
+	Affichage du formulaire
+	"""
+	model =  BirthCertificate
+	form_class = BirthCertificateForm2
+	success_url = reverse_lazy('birthsuccess')
+
+
+
+def DeclarationSuccess(request):
+	"""
+	Message de confirmation
+	"""
+	"""
+	if request.method == 'POST':
+
+		form = BirthCertificateForm2()
+
+		if form.is_valid() :   # Vérification sur la validité des données
+			post = form.save()
+			message.success(request, 'Le formulaire a été enregistré !')
+	#            return HttpResponseRedirect(reverse('BC_treated2', kwargs={'id': post.id}))
+			return render(request, 'DeclarationBirth.html')
+		else:
+			return render(request, 'DeclarationBirth.html')
+
+	"""
+	return render(request, 'DeclarationBirth.html')
+
+
+
+
+def index(request):
+
+	form = BulletinForm()
+	return render(request, 'index.html', {'form': form})
+
+
+def CreatePlug(request):
+
+        print("ok") 
+
+
+def ViewPlug(request):
+
+        print("ok") 
+
+
+
+#@login_required
+def BirthCertificate_Form_unique_number(request) :
+     
+	#User fill some fields
+	query_social_number = request.GET.get('social_number')
+	query_social_number_father = request.GET.get('social_number_father')
+	query_social_number_mother = request.GET.get('social_number_mother')
+     
+	if request.method == 'POST':
+             
+		form = BirthCertificateForm2(request.POST or None)
+ 
+		if form.is_valid() :   # Vérification sur la validité des données
+			post = form.save()
+			message.success(request, 'Le formulaire a été enregistré !')
+#            return HttpResponseRedirect(reverse('BC_treated2', kwargs={'id': post.id}))
+ 
+		else:
+         
+			form = BirthCertificateForm2()
+         
+			parent1 = Person.objects.filter(social_number=query_social_number_father)
+			parent2 = Person.objects.filter(social_number=query_social_number_mother)
+			individu = Person.objects.filter(social_number = query_social_number)
+ 
+			form.fields['fk_parent1'].queryset = parent1
+			form.fields['fk_parent2'].queryset = parent2
+			form.fields['lastname'].queryset = individu.lastname
+			form.fields['firstname'].queryset = individu.firstname
+			form.fields['birthday'].queryset = individu.birthday
+			form.fields['birthcity'].queryset = individu.birthcity
+			form.fields['birthcountry'].queryset = individu.birthcountry
+			form.fields['sex'].queryset = individu.sex
+			form.fields['social_number'].queryset = individu
+ 
+		print (request.POST)
+ 
+		context = {
+			"form" : form,
+			"individu": individu,
+			}
+ 
+		return render(request, 'BC_form2.html', context)
+
+
+
+
+
+
+class RegistrationCreate(CreateView):
+	"""
+	Affichage du formulaire
+	"""
+	model = Person
+	form_class = RegistrationForm
+	success_url = reverse_lazy('qslsldsdl')
+
+def registration_success(request):
+	return render(request, 'registration_success.html')

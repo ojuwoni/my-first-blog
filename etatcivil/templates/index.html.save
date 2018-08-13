@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestion des fiches individuelles 
+{% endblock title %}
+{% block nav-style %}mkt-nav{% endblock nav-style %}
+{% block content %}
+<p> </p>
+<p>*    <a href="CreatePlug">CreatePlug</a></p>
+<p>*    <a href="#">{{eregister.views.ViewPlug}}</a></p>
+<p> *   Supprimer une fiche individuelle </p>
+{% endblock content %}
+~

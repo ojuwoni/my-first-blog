@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Service de l'état civil</h1>
+  <p>Fiche d'enregistrement des administrés, application développée par <em>IDADU TECH</em>!</p>
+
+  <h2>Statistiques du mois</h2>
+  <p>A ce jour, nous avons les statistiques suivantes:</p>
+  <ul>
+    <li><strong>Nombre de personnes enregistrées:</strong> {{ num_registration }}</li>
+    <li><strong>Nombre de naissances:</strong> {{ num_birth }}</li>
+    <li><strong>Nombre de mariages:</strong> {{ num_instances_available }}</li>
+    <li><strong>Nombre de décès:</strong> {{ num_authors }}</li>
+  </ul>
+{% endblock %}
